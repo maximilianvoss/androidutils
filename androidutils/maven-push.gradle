@@ -17,14 +17,6 @@
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-def isReleaseBuild() {
-    def runTasks = gradle.startParameter.taskNames
-    if ('assembleRelease' in runTasks) {
-        return true;
-    }
-    return false;
-}
-
 def getReleaseRepositoryUrl() {
     return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
             : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
@@ -94,8 +86,7 @@ afterEvaluate { project ->
 
     signing {
         required {
-            true;
-//            isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives")
+            gradle.taskGraph.hasTask("assembleRelease") && gradle.taskGraph.hasTask("uploadArchives")
         }
         sign configurations.archives
     }
