@@ -1,0 +1,137 @@
+apply plugin: 'com.android.library'
+apply from: 'maven-push.gradle'
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+def mVersionName = ""
+ext.mVersionNumber = ""
+
+def versionPropsFile = rootProject.file('version.properties')
+def value = 0
+def isSnapshot = true
+Properties versionProps = new Properties()
+if (!versionPropsFile.exists()) {
+    versionProps['VERSION_MAJOR'] = "0"
+    versionProps['VERSION_MINOR'] = "0"
+    versionProps['VERSION_PATCH'] = "0"
+    versionProps['VERSION_NUMBER'] = "0"
+    versionProps['VERSION_BUILD'] = "-1"
+    versionProps.store(versionPropsFile.newWriter(), null)
+}
+
+def runTasks = gradle.startParameter.taskNames
+if ('assembleRelease' in runTasks) {
+    value = 1
+    isSnapshot = false
+}
+
+
+if (versionPropsFile.canRead()) {
+    versionProps.load(new FileInputStream(versionPropsFile))
+
+    versionProps['VERSION_PATCH'] = (versionProps['VERSION_PATCH'].toInteger() + value).toString()
+    versionProps['VERSION_NUMBER'] = (versionProps['VERSION_NUMBER'].toInteger() + value).toString()
+    versionProps['VERSION_BUILD'] = (versionProps['VERSION_BUILD'].toInteger() + 1).toString()
+    versionProps.store(versionPropsFile.newWriter(), null)
+
+    mVersionNumber = "${versionProps['VERSION_MAJOR']}.${versionProps['VERSION_MINOR']}.${versionProps['VERSION_PATCH']}";
+    if (isSnapshot) {
+        mVersionNumber = "${mVersionNumber}-SNAPSHOT"
+    }
+    mVersionName = "v${mVersionNumber}";
+} else {
+    throw new FileNotFoundException("Could not read version.properties!")
+}
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 27
+        versionCode versionProps['VERSION_NUMBER'].toInteger()
+        versionName "${mVersionName} Build: ${versionProps['VERSION_BUILD']}"
+    }
+
+    signingConfigs {
+        signConfig {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.signConfig
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
+}
+
+android.libraryVariants.all { variant ->
+    variant.outputs.all {
+        outputFileName = "androidutils-${mVersionNumber}.aar"
+    }
+}
+
+dependencies {
+    annotationProcessor "android.arch.persistence.room:compiler:1.1.0"
+    annotationProcessor 'org.projectlombok:lombok:1.16.20'
+    compileOnly 'org.projectlombok:lombok:1.16.20'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+}
+
+task gittag() {
+    outputs.upToDateWhen { false }
+    inputs.file(rootProject.file('version.properties'))
+
+    if ('assembleRelease' in runTasks) {
+        exec {
+            workingDir rootProject.getRootDir()
+            commandLine 'git', 'add', "${rootProject.path}/version.properties"
+        }
+        exec {
+            workingDir rootProject.getRootDir()
+            commandLine 'git', 'commit', '-m', 'release build'
+        }
+        exec {
+            workingDir rootProject.getRootDir()
+            commandLine "bash", "-c", "git tag -a ${mVersionName} -m ${mVersionName}"
+        }
+        exec {
+            workingDir rootProject.getRootDir()
+            commandLine 'git', 'push'
+        }
+        exec {
+            workingDir rootProject.getRootDir()
+            commandLine 'git', 'push', '--tags'
+        }
+    }
+}

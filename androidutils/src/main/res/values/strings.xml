@@ -1,0 +1,4 @@
+<resources>
+    <string name="local_separator">,</string>
+    <string name="measure_unit_sign">kg</string>
+</resources>
