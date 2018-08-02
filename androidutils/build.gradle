@@ -35,10 +35,10 @@ if (versionPropsFile.canRead()) {
     versionProps['VERSION_BUILD'] = (versionProps['VERSION_BUILD'].toInteger() + 1).toString()
     versionProps.store(versionPropsFile.newWriter(), null)
 
-    mVersionNumber = "${versionProps['VERSION_MAJOR']}.${versionProps['VERSION_MINOR']}.${versionProps['VERSION_PATCH']}";
-    if (isSnapshot) {
-        mVersionNumber = "${mVersionNumber}-SNAPSHOT"
+    if ( isSnapshot ) {
+        versionProps['VERSION_PATCH'] = (versionProps['VERSION_PATCH'].toInteger() + 1).toString() + "-SNAPSHOT"
     }
+    mVersionNumber = "${versionProps['VERSION_MAJOR']}.${versionProps['VERSION_MINOR']}.${versionProps['VERSION_PATCH']}";
     mVersionName = "v${mVersionNumber}";
 } else {
     throw new FileNotFoundException("Could not read version.properties!")
