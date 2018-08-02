@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import java.math.BigDecimal;
 
@@ -25,6 +26,8 @@ public class DoubleNumberPicker extends LinearLayout {
 
     private NumberPicker integerPicker;
     private NumberPicker fractionPicker;
+    private TextView seperator;
+    private TextView unit;
 
     public DoubleNumberPicker(Context context) {
         this(context, null);
@@ -44,15 +47,26 @@ public class DoubleNumberPicker extends LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.widget_doublepicker, this);
         integerPicker = findViewById(R.id.integer_picker);
         fractionPicker = findViewById(R.id.fraction_picker);
+        seperator = findViewById(R.id.separator);
+        unit = findViewById(R.id.unit);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DoubleNumberPicker, defStyleAttr, defStyleRes);
         setMinValue(a.getInt(R.styleable.DoubleNumberPicker_min_value, 0));
         setMaxValue(a.getInt(R.styleable.DoubleNumberPicker_max_value, 1000));
         setDecimals(a.getInt(R.styleable.DoubleNumberPicker_decimals, 1));
         setDefaultValue(a.getFloat(R.styleable.DoubleNumberPicker_default_value, 0));
+        setSeparator(a.getString(R.styleable.DoubleNumberPicker_separator));
+        setUnit(a.getString(R.styleable.DoubleNumberPicker_unit));
         a.recycle();
     }
 
+    public void setSeparator(String separator) {
+        this.seperator.setText(separator);
+    }
+
+    public void setUnit(String unit) {
+        this.unit.setText(unit);
+    }
 
     public void setMinValue(int minValue) {
         this.minValue = minValue;

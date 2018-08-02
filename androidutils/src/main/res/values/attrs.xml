@@ -5,5 +5,7 @@
         <attr name="max_value" format="integer" />
         <attr name="default_value" format="float" />
         <attr name="decimals" format="integer" />
+        <attr name="unit" format="string" />
+        <attr name="separator" format="string" />
     </declare-styleable>
 </resources>

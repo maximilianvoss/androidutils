@@ -1,4 +1,4 @@
 <resources>
-    <string name="local_separator">,</string>
-    <string name="measure_unit_sign">kg</string>
+    <string name="doublepicker_default_separator">,</string>
+    <string name="doublepicker_default_unit">kg</string>
 </resources>
