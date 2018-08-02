@@ -1,6 +1,7 @@
 package rocks.voss.androidutils.ui;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,9 +12,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import rocks.voss.androidutils.R;
+
 public class CarouselLayout extends LinearLayout {
     private final GestureDetector gestureDetector;
     private int active = 0;
+    private Paint indicatorColor = new Paint();
 
     public CarouselLayout(Context context) {
         this(context, null);
@@ -30,6 +34,10 @@ public class CarouselLayout extends LinearLayout {
     public CarouselLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setWillNotDraw(false);
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarouselLayout, defStyleAttr, defStyleRes);
+        indicatorColor.setColor(a.getColor(R.styleable.CarouselLayout_indicatorColor, Color.WHITE));
+        a.recycle();
 
         gestureDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
             @Override
@@ -106,8 +114,6 @@ public class CarouselLayout extends LinearLayout {
         float size = radius * 4;
         float start = (getWidth() - size * (count - 1)) / 2;
 
-        Paint indicatorColor = new Paint();
-        indicatorColor.setColor(Color.WHITE);
         for (int i = 0; i < count; i++) {
             if (active == i) {
                 indicatorColor.setStyle(Paint.Style.FILL_AND_STROKE);

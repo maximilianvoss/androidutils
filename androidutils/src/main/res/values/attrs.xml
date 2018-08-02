@@ -8,4 +8,7 @@
         <attr name="unit" format="string" />
         <attr name="separator" format="string" />
     </declare-styleable>
+    <declare-styleable name="CarouselLayout">
+        <attr name="indicatorColor" format="color" />
+    </declare-styleable>
 </resources>
