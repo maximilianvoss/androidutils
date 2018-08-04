@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.math.BigDecimal;
 
 import lombok.Getter;
+import lombok.Setter;
 import rocks.voss.androidutils.R;
 
 public class DoubleNumberPicker extends LinearLayout {
@@ -23,11 +24,15 @@ public class DoubleNumberPicker extends LinearLayout {
     private float defaultValue;
     @Getter
     private int decimals;
+    @Setter
+    @Getter
+    private boolean autoIntegerUpdate;
 
     private NumberPicker integerPicker;
     private NumberPicker fractionPicker;
     private TextView seperator;
     private TextView unit;
+
 
     public DoubleNumberPicker(Context context) {
         this(context, null);
@@ -57,7 +62,20 @@ public class DoubleNumberPicker extends LinearLayout {
         setDefaultValue(a.getFloat(R.styleable.DoubleNumberPicker_default_value, 0));
         setSeparator(a.getString(R.styleable.DoubleNumberPicker_separator));
         setUnit(a.getString(R.styleable.DoubleNumberPicker_unit));
+        setAutoIntegerUpdate(a.getBoolean(R.styleable.DoubleNumberPicker_auto_integer_update, false));
         a.recycle();
+
+        fractionPicker.setOnValueChangedListener(
+                (picker, oldVal, newVal) -> {
+                    if (autoIntegerUpdate) {
+                        if (oldVal == picker.getMaxValue() && newVal == picker.getMinValue()) {
+                            integerPicker.setValue(integerPicker.getValue() + 1);
+                        } else if (newVal == picker.getMaxValue() && oldVal == picker.getMinValue()) {
+                            integerPicker.setValue(integerPicker.getValue() - 1);
+                        }
+                    }
+                }
+        );
     }
 
     public void setSeparator(String separator) {

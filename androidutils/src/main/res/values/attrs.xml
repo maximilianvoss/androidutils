@@ -7,6 +7,7 @@
         <attr name="decimals" format="integer" />
         <attr name="unit" format="string" />
         <attr name="separator" format="string" />
+        <attr name="auto_integer_update" format="boolean" />
     </declare-styleable>
     <declare-styleable name="CarouselLayout">
         <attr name="indicatorColor" format="color" />
