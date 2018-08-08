@@ -1,4 +1,8 @@
 <resources>
     <string name="doublepicker_default_separator">,</string>
     <string name="doublepicker_default_unit">kg</string>
+
+    <string name="activity_export_gd_button_file_upload">Upload File</string>
+    <string name="activity_export_gd_filename_export">export-%1$s.csv</string>
+    <string name="activity_export_gd_button_export_data">Export Data</string>
 </resources>
