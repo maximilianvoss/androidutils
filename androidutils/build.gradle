@@ -48,7 +48,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 24
         targetSdkVersion 27
         versionCode versionProps['VERSION_NUMBER'].toInteger()
         versionName "${mVersionName} Build: ${versionProps['VERSION_BUILD']}"

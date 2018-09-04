@@ -1,7 +1,10 @@
 package rocks.voss.androidutils.utils;
 
 import android.arch.persistence.room.Room;
+import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,8 +19,14 @@ public class DatabaseUtil {
     @Getter
     private static Database database;
 
-    public void openDatabase(Context context, Class dbClazz, String dbName) {
-        database = (Database) Room.databaseBuilder(context, dbClazz, dbName).fallbackToDestructiveMigration().build();
+    public void openDatabase(Context context, Class dbClazz, String dbName, Migration... migrations) {
+        RoomDatabase.Builder databaseBuilder = Room.databaseBuilder(context, dbClazz, dbName);
+        if (migrations != null || migrations.length < 1) {
+            databaseBuilder.addMigrations(migrations);
+        } else {
+            databaseBuilder.fallbackToDestructiveMigration();
+        }
+        database = (Database) databaseBuilder.build();
     }
 
     public <DaoType> DaoType getDao(Class clazz) {
@@ -27,7 +36,10 @@ public class DatabaseUtil {
         return database.getDao(clazz);
     }
 
-    public <ELEMENT> ELEMENT insertAll(Class<ELEMENT> daoType, ELEMENT element) {
+    public <ELEMENT> ELEMENT insert(Class<ELEMENT> daoType, ELEMENT element) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            throw new IllegalStateException("This method is only available with SDK >= 26");
+        }
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -52,6 +64,9 @@ public class DatabaseUtil {
     }
 
     public void getAll(Class daoType, Object primaryKey, GetAllCallback callback) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            throw new IllegalStateException("This method is only available with SDK >= 26");
+        }
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -61,7 +76,12 @@ public class DatabaseUtil {
                 try {
                     for (Method method : daoObject.getClass().getDeclaredMethods()) {
                         if (method.getName().equals("getAll") && method.getParameterCount() == 1) {
-                            List<Object> result = (List<Object>) method.invoke(daoObject, primaryKey);
+                            List<Object> result;
+                            if (primaryKey == null) {
+                                result = (List<Object>) method.invoke(daoObject);
+                            } else {
+                                result = (List<Object>) method.invoke(daoObject, primaryKey);
+                            }
                             callback.onResultReady(result);
                             return;
                         }
