@@ -44,10 +44,13 @@ public class DatabaseUtil {
             @Override
             public void run() {
                 super.run();
+                Log.d(this.getClass().toString(), "insert: starting ruh thread for insert");
                 Object daoObject = getDao(daoType);
                 try {
                     for (Method method : daoObject.getClass().getDeclaredMethods()) {
+                        Log.d(this.getClass().toString(), "insert: iterating methods: " + method.getName());
                         if (method.getName().equals("insert") && method.getParameterCount() == 1 && method.getParameterTypes()[0].equals(element.getClass())) {
+                            Log.d(this.getClass().toString(), "insert: found insert method & execute");
                             method.invoke(daoObject, element);
                             return;
                         }
@@ -59,6 +62,7 @@ public class DatabaseUtil {
                 }
             }
         };
+
         thread.start();
         return null;
     }
@@ -72,17 +76,29 @@ public class DatabaseUtil {
             public void run() {
                 super.run();
 
+                Log.d(this.getClass().toString(), "getAll: starting run thread for getAll");
                 Object daoObject = getDao(daoType);
                 try {
                     for (Method method : daoObject.getClass().getDeclaredMethods()) {
-                        if (method.getName().equals("getAll") && method.getParameterCount() == 1) {
-                            List<Object> result;
-                            if (primaryKey == null) {
+                        Log.d(this.getClass().toString(), "getAll: iterating methods: " + method.getName());
+                        List<Object> result = null;
+                        if (method.getName().equals("getAll")) {
+                            Log.d(this.getClass().toString(), "getAll: getAll method found");
+                            if (primaryKey == null && method.getParameterCount() == 0) {
+                                Log.d(this.getClass().toString(), "getAll: primaryKey == null, getParameterCount == 0");
                                 result = (List<Object>) method.invoke(daoObject);
-                            } else {
+                            } else if (primaryKey != null && method.getParameterCount() == 1) {
+                                Log.d(this.getClass().toString(), "getAll: primaryKey != null, getParameterCount == 1");
                                 result = (List<Object>) method.invoke(daoObject, primaryKey);
+                            } else {
+                                Log.d(this.getClass().toString(), "getAll: else clause");
                             }
-                            callback.onResultReady(result);
+
+                            if (result != null) {
+                                Log.d(this.getClass().toString(), "getAll: result != null");
+                                callback.onResultReady(result);
+                            }
+                            Log.d(this.getClass().toString(), "getAll: exit");
                             return;
                         }
                     }
@@ -94,6 +110,7 @@ public class DatabaseUtil {
             }
         };
         thread.start();
+
         try {
             thread.join();
         } catch (InterruptedException e) {
@@ -107,12 +124,22 @@ public class DatabaseUtil {
             public void run() {
                 super.run();
 
+                Log.d(this.getClass().toString(), "delete: starting run thread for delete");
                 Object daoObject = getDao(daoType);
                 try {
                     for (Method method : daoObject.getClass().getDeclaredMethods()) {
-                        if (method.getName().equals("delete") && method.getParameterCount() == 1) {
-                            method.invoke(daoObject, primaryKey);
-                            return;
+                        Log.d(this.getClass().toString(), "delete: iterating methods: " + method.getName());
+                        if (method.getName().equals("delete")) {
+                            Log.d(this.getClass().toString(), "delete: delete method found");
+                            if (primaryKey == null && method.getParameterCount() == 0) {
+                                Log.d(this.getClass().toString(), "delete: primaryKey == null, getParameterCount == 0");
+                                method.invoke(daoObject);
+                            } else if (primaryKey != null && method.getParameterCount() == 1) {
+                                Log.d(this.getClass().toString(), "delete: primaryKey != null, getParameterCount == 1");
+                                method.invoke(daoObject, primaryKey);
+                            } else {
+                                Log.d(this.getClass().toString(), "delete: else clause");
+                            }
                         }
                     }
                 } catch (IllegalAccessException e) {
@@ -123,6 +150,7 @@ public class DatabaseUtil {
             }
         };
         thread.start();
+
         try {
             thread.join();
         } catch (InterruptedException e) {
