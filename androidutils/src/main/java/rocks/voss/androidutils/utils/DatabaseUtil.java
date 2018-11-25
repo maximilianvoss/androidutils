@@ -44,9 +44,10 @@ public class DatabaseUtil {
             @Override
             public void run() {
                 super.run();
-                Log.d(this.getClass().toString(), "insert: starting ruh thread for insert");
+                Log.d(this.getClass().toString(), "insert: starting run thread for insert");
                 Object daoObject = getDao(daoType);
                 try {
+                    Log.d(this.getClass().toString(), "insert: getDeclaredMethodsCount: " + daoObject.getClass().getDeclaredMethods().length);
                     for (Method method : daoObject.getClass().getDeclaredMethods()) {
                         Log.d(this.getClass().toString(), "insert: iterating methods: " + method.getName());
                         if (method.getName().equals("insert") && method.getParameterCount() == 1 && method.getParameterTypes()[0].equals(element.getClass())) {
