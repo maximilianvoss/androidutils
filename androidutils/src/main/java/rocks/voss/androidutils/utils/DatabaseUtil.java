@@ -37,6 +37,10 @@ public class DatabaseUtil {
     }
 
     public <ELEMENT> ELEMENT insert(Class<ELEMENT> daoType, ELEMENT element) {
+        return insert(daoType, element, false);
+    }
+
+    public <ELEMENT> ELEMENT insert(Class<ELEMENT> daoType, ELEMENT element, boolean sync) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             throw new IllegalStateException("This method is only available with SDK >= 26");
         }
@@ -65,6 +69,13 @@ public class DatabaseUtil {
         };
 
         thread.start();
+        if (sync) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Log.e(this.getClass().toString(), "InterruptedException", e);
+            }
+        }
         return null;
     }
 
