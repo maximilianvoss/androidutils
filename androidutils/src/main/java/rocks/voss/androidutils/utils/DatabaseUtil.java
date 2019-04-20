@@ -162,6 +162,41 @@ public class DatabaseUtil {
             }
         };
         thread.start();
+    }
+
+
+    public void update(Class daoType, Object primaryKey) {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+
+                Log.d(this.getClass().toString(), "update: starting run thread for delete");
+                Object daoObject = getDao(daoType);
+                try {
+                    for (Method method : daoObject.getClass().getDeclaredMethods()) {
+                        Log.d(this.getClass().toString(), "update: iterating methods: " + method.getName());
+                        if (method.getName().equals("update")) {
+                            Log.d(this.getClass().toString(), "update: delete method found");
+                            if (primaryKey == null && method.getParameterCount() == 0) {
+                                Log.d(this.getClass().toString(), "update: primaryKey == null, getParameterCount == 0");
+                                method.invoke(daoObject);
+                            } else if (primaryKey != null && method.getParameterCount() == 1) {
+                                Log.d(this.getClass().toString(), "update: primaryKey != null, getParameterCount == 1");
+                                method.invoke(daoObject, primaryKey);
+                            } else {
+                                Log.d(this.getClass().toString(), "update: else clause");
+                            }
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                    Log.e(this.getClass().toString(), "IllegalAccessException", e);
+                } catch (InvocationTargetException e) {
+                    Log.e(this.getClass().toString(), "InvocationTargetException", e);
+                }
+            }
+        };
+        thread.start();
 
         try {
             thread.join();
