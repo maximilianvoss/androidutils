@@ -21,7 +21,7 @@ public class DatabaseUtil {
 
     public void openDatabase(Context context, Class dbClazz, String dbName, Migration... migrations) {
         RoomDatabase.Builder databaseBuilder = Room.databaseBuilder(context, dbClazz, dbName);
-        if (migrations != null || migrations.length > 0) {
+        if (migrations != null && migrations.length > 0) {
             databaseBuilder.addMigrations(migrations);
         } else {
             databaseBuilder.fallbackToDestructiveMigration();
